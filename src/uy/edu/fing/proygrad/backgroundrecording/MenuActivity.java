@@ -4,6 +4,7 @@ package uy.edu.fing.proygrad.backgroundrecording;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,6 +39,11 @@ public class MenuActivity extends Activity {
         // Handle item selection.
         switch (item.getItemId()) {
             case R.id.stop:
+            	Log.e(TAG, "onOptionsItemSelected - stop");
+            	if(recording){
+            		stopService(new Intent(MenuActivity.this, BackgroundVideoRecorder.class));
+            	}
+            	
                 // Stop the service at the end of the message queue for proper options menu
                 // animation. This is only needed when starting a new Activity or stopping a Service
                 // that published a LiveCard.
@@ -45,9 +51,7 @@ public class MenuActivity extends Activity {
 
                     @Override
                     public void run() {
-                    	if(recording){
-                    		stopService(new Intent(MenuActivity.this, BackgroundVideoRecorder.class));
-                    	}
+                    	
                     	
                         stopService(new Intent(MenuActivity.this, SimpleLiveCardService.class));
                     }
@@ -58,7 +62,7 @@ public class MenuActivity extends Activity {
                 // Start the new Activity at the end of the message queue for proper options menu
                 // animation. This is only needed when starting a new Activity or stopping a Service
                 // that published a LiveCard.
-            	System.out.println("ELige record");
+            	Log.e(TAG, "onOptionsItemSelected - record");
             	
             	
             	// potentially add data to the intent

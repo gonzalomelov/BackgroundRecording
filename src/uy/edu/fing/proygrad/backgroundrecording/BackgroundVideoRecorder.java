@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
+
 import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
@@ -24,6 +25,7 @@ import android.view.WindowManager.LayoutParams;
 
 public class BackgroundVideoRecorder extends Service implements SurfaceHolder.Callback {
 
+	private static final String TAG = "BackgroundVideoRecorder";
 	public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
 	
@@ -35,14 +37,14 @@ public class BackgroundVideoRecorder extends Service implements SurfaceHolder.Ca
     @Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
     	
-    	System.out.println("Service start");
+    	Log.e(TAG, "Constructor");
     	
     	return 1;}
     
     @Override
     public void onCreate() {
 
-    	System.out.println("Se crea servicio");
+    	Log.e(TAG, "onCreate");
         // Start foreground service to avoid unexpected kill
         Notification notification = new Notification.Builder(this)
             .setContentTitle("Background Video Recorder")
@@ -69,7 +71,9 @@ public class BackgroundVideoRecorder extends Service implements SurfaceHolder.Ca
     // Method called right after Surface created (initializing and starting MediaRecorder)
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-
+    	
+    	Log.e(TAG, "surfaceCreated");
+    	
         camera = Camera.open();
         mediaRecorder = new MediaRecorder();
         camera.unlock();
@@ -90,7 +94,7 @@ public class BackgroundVideoRecorder extends Service implements SurfaceHolder.Ca
     // Stop recording and remove SurfaceView
     @Override
     public void onDestroy() {
-
+    	Log.e(TAG, "onDestroy");
         mediaRecorder.stop();
         mediaRecorder.reset();
         mediaRecorder.release();
