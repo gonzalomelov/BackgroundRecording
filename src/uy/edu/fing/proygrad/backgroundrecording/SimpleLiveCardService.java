@@ -49,6 +49,7 @@ public class SimpleLiveCardService extends Service {
         	
         	// potentially add data to the intent
         	
+            //ESTO HAY QUE BORRARLO
         	startService(new Intent(this, BackgroundVideoRecorder.class)); 
         	recording = true;
         } else {
