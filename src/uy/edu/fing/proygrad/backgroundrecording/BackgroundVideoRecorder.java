@@ -1,8 +1,13 @@
 package uy.edu.fing.proygrad.backgroundrecording;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+
+
+
 
 
 
@@ -14,6 +19,7 @@ import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.media.MediaRecorder.OnInfoListener;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
@@ -23,7 +29,7 @@ import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
-public class BackgroundVideoRecorder extends Service implements SurfaceHolder.Callback {
+public class BackgroundVideoRecorder extends Service implements SurfaceHolder.Callback, OnInfoListener{
 
 	private static final String TAG = "BackgroundVideoRecorder";
 	public static final int MEDIA_TYPE_IMAGE = 1;
@@ -33,6 +39,8 @@ public class BackgroundVideoRecorder extends Service implements SurfaceHolder.Ca
     private SurfaceView surfaceView;
     private Camera camera = null;
     private MediaRecorder mediaRecorder = null;
+    private boolean first = true;
+    private SurfaceHolder sh;
 
     @Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -72,22 +80,228 @@ public class BackgroundVideoRecorder extends Service implements SurfaceHolder.Ca
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
     	
+    	sh = surfaceHolder;
+    	
     	Log.e(TAG, "surfaceCreated");
     	
-        camera = Camera.open();
-        mediaRecorder = new MediaRecorder();
-        camera.unlock();
+    	try {
+    		camera = Camera.open();
+			camera.setPreviewDisplay(null);
+			camera.stopPreview();
+			camera.unlock();
+			startRecording();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	
+    	
+//    	try{
+//    		createMediaRecorder(surfaceHolder);
+//    	}catch(Exception e){
+//    		if(cameraOpened)
+//    			camera.release();
+//    	}
+        
+      
+        
 
-        mediaRecorder.setPreviewDisplay(surfaceHolder.getSurface());
+    }
+    
+    private void createMediaRecorder(){
+    	mediaRecorder = new MediaRecorder();
+    	Log.e(TAG, "1");
+//    	if(first){
+            camera.unlock();
+//            first = false;
+//    	}
+
+    	try {
+    		camera.setPreviewDisplay(null);
+    		Log.e(TAG, "2");
+    		if(first){
+        		Log.e(TAG, "2.1");
+            	camera.stopPreview();
+            	Log.e(TAG, "3");
+              camera.unlock();
+              Log.e(TAG, "4");
+              first = false;
+        	}
+    	} catch (java.io.IOException ioe) {
+    	    Log.d(TAG, "IOException nullifying preview display: " + ioe.getMessage());
+    	}
+    	
+    	
+
+        mediaRecorder.setPreviewDisplay(sh.getSurface());
+        Log.e(TAG, "5");
         mediaRecorder.setCamera(camera);
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        Log.e(TAG, "6");
+        mediaRecorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+			
+			@Override
+			public void onInfo(MediaRecorder mr, int what, int extra) {
+				Log.e(TAG, "onInfo");
+				if(what==MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED) 
+				 { 
+					Log.e(TAG, "onInfo - IF");
+					mediaRecorder.stop();
+					Log.e(TAG, "onInfo - stop");
+			        mediaRecorder.reset();
+			        Log.e(TAG, "onInfo - reset");
+			        mediaRecorder.release();
+			        Log.e(TAG, "onInfo - release");
+					createMediaRecorder();
+				  } 
+				   
+				//createMediaRecorder(surfaceHolder);
+				
+			}
+		});
+//        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+        Log.e(TAG, "7");
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        Log.e(TAG, "8");
+        mediaRecorder.setVideoSize(1280, 720);
+        Log.e(TAG, "9");
+        mediaRecorder.setVideoFrameRate(30);
+        Log.e(TAG, "10");
+        mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        Log.e(TAG, "11");
+        mediaRecorder.setVideoEncodingBitRate(690000);
+        Log.e(TAG, "12");
+       
+        
+        //mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+       
+       
+       // mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+	
+    
+        record();
+    }
+    
+    
+    private void startRecording(){
+    	try{
 
-        mediaRecorder.setOutputFile(getOutputMediaFile(this.MEDIA_TYPE_VIDEO).toString() );
+        	
+        	
+            initRecorder();
+            prepareRecorder();
 
-        try { mediaRecorder.prepare(); } catch (Exception e) {}
-        mediaRecorder.start();
+            mediaRecorder.start();
+    		
+    	}catch (Exception e){
+    		 Log.e(TAG, "Se rompe todo!");
+    		 e.printStackTrace();
+    	}
+    	
+    	
+    }
+    
+    private void initRecorder(){
+    	mediaRecorder = new MediaRecorder();
+    	
+    	// Step 1: Unlock and set camera to MediaRecorder
+    	mediaRecorder.setCamera(camera);
+    	
+    	// Step 2: Set sources
+    	mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+    	mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+    	
+    	
+    	// Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
+    	mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_720P));
+    	
+    	// Step 3: Set output format and encoding (for versions prior to API Level 8)
+//    	mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+//      mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+//    	mediaRecorder.setVideoSize(1280, 720);
+//    	mediaRecorder.setVideoFrameRate(30);
+//      mediaRecorder.setVideoEncodingBitRate(690000);
+    	
+    	// Step 4: Set output file
+    	mediaRecorder.setOutputFile(getOutputMediaFile(this.MEDIA_TYPE_VIDEO).toString() );
+    	
+    	
+    	// Step 5: Set the preview output
+    	mediaRecorder.setPreviewDisplay(sh.getSurface());
+    	
+    	mediaRecorder.setVideoFrameRate(30);
+    	mediaRecorder.setVideoEncodingBitRate(690000);
+    	  
+        mediaRecorder.setMaxFileSize(5242880);
+        mediaRecorder.setOnInfoListener(this);
+    }
+    
+    private void stopRecording(){
+    	mediaRecorder.stop();
+    	mediaRecorder.reset();
+    	mediaRecorder.release();
+    	mediaRecorder = null;
+    	camera.lock();
+    	camera.stopPreview();
+		camera.unlock();
+    }
+    
+    
+
+
+	@Override
+	public void onInfo(MediaRecorder mr, int what, int extra) {
+		
+		if(what==MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED) 
+		 { 
+			Log.e(TAG, "Llena tamanio");
+			
+				stopRecording();
+//				
+				 initRecorder();
+				 prepareRecorder();
+				 
+				 mediaRecorder.start();
+				
+
+		 }
+		
+	}
+
+	private void prepareRecorder() {
+		
+		try {
+			mediaRecorder.prepare();
+		} catch (IllegalStateException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+    private void record(){
+    	Log.e(TAG, "record");
+    	 mediaRecorder.setOutputFile(getOutputMediaFile(this.MEDIA_TYPE_VIDEO).toString() );
+    	 Log.e(TAG, "record - setOutputFile");
+    	 mediaRecorder.setMaxFileSize(5242880);
+    	 Log.e(TAG, "record - setMaxFileSize");
+    	 
+    	
+    	try { 
+    		mediaRecorder.prepare();
+    		Log.e(TAG, "record - prepare");
+    		} catch (Exception e) {
+    			Log.e(TAG, "record - error");
+    			e.printStackTrace();
+    		}
+    	try{
+            mediaRecorder.start();
+            Log.e(TAG, "record - start");
+    	}catch (Exception e){
+            e.printStackTrace();
+    	}
 
     }
 
@@ -148,5 +362,7 @@ public class BackgroundVideoRecorder extends Service implements SurfaceHolder.Ca
         System.out.println("DIR: " + mediaStorageDir.getPath() + File.separator + "VID_"+ timeStamp + ".mp4");
         return mediaFile;
     }
+
+
 
 }
