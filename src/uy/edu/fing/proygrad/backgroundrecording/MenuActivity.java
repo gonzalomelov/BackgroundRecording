@@ -1,6 +1,8 @@
 package uy.edu.fing.proygrad.backgroundrecording;
 
 
+
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
@@ -40,22 +42,22 @@ public class MenuActivity extends Activity {
         switch (item.getItemId()) {
             case R.id.stop:
             	Log.e(TAG, "onOptionsItemSelected - stop");
-            	if(recording){
-            		stopService(new Intent(MenuActivity.this, BackgroundVideoRecorder.class));
-            	}
-            	
-                // Stop the service at the end of the message queue for proper options menu
-                // animation. This is only needed when starting a new Activity or stopping a Service
-                // that published a LiveCard.
-                post(new Runnable() {
-
-                    @Override
-                    public void run() {
-                    	
-                    	
-                        stopService(new Intent(MenuActivity.this, SimpleLiveCardService.class));
-                    }
-                });
+//            	if(recording){
+//            		stopService(new Intent(MenuActivity.this, BackgroundVideoRecorder.class));
+//            	}
+//            	
+//                // Stop the service at the end of the message queue for proper options menu
+//                // animation. This is only needed when starting a new Activity or stopping a Service
+//                // that published a LiveCard.
+//                post(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                    	
+//                    	
+//                        stopService(new Intent(MenuActivity.this, SimpleLiveCardService.class));
+//                    }
+//                });
                 return true;
             
             case R.id.record:
@@ -67,11 +69,20 @@ public class MenuActivity extends Activity {
             	
             	// potentially add data to the intent
             	
-            	startService(new Intent(this, BackgroundVideoRecorder.class)); 
-            	recording = true;
+//            	startService(new Intent(this, BackgroundVideoRecorder.class)); 
+//            	recording = true;
+            	startService(new Intent(this, SendService.class)); 
             	
 
                 return true;
+            case R.id.video:
+//            	Intent myIntent = new Intent(MenuActivity.this,
+//						VideoViewActivity.class);
+//				startActivity(myIntent);
+            	Intent i = new Intent();
+            	i.setAction("com.google.glass.action.VIDEOPLAYER");
+            	i.putExtra("video_url", "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov"); 
+            	startActivity(i);
 
             default:
                 return super.onOptionsItemSelected(item);

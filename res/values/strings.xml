@@ -7,6 +7,7 @@
     <string name="record">Record</string>
     <string name="items">Items</string>
     <string name="stop">Stop</string>
+    <string name="video">Video</string>
     <string name="btnCapture">Capture</string>
 
 </resources>

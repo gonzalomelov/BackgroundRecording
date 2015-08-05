@@ -18,26 +18,30 @@ public final class R {
         public static final int ic_video_50=0x7f020004;
     }
     public static final class id {
+        public static final int VideoView=0x7f080002;
         public static final int card_sample_textview=0x7f080001;
-        public static final int record=0x7f080002;
-        public static final int stop=0x7f080003;
+        public static final int record=0x7f080003;
+        public static final int stop=0x7f080004;
         public static final int surface_view=0x7f080000;
+        public static final int video=0x7f080005;
     }
     public static final class layout {
         public static final int record_layout=0x7f030000;
         public static final int simple_layout=0x7f030001;
+        public static final int videoview_main=0x7f030002;
     }
     public static final class menu {
         public static final int simple=0x7f070000;
     }
     public static final class string {
         public static final int app_name=0x7f050000;
-        public static final int btnCapture=0x7f050006;
+        public static final int btnCapture=0x7f050007;
         public static final int card_sample_text=0x7f050001;
         public static final int items=0x7f050004;
         public static final int record=0x7f050003;
         public static final int remember=0x7f050002;
         public static final int stop=0x7f050005;
+        public static final int video=0x7f050006;
     }
     public static final class style {
         public static final int MenuTheme=0x7f060000;
